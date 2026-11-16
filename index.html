@@ -21,10 +21,16 @@ var PHONES=[["Deaaron",["cade","lena"]],["Carter Bryant",["cyra"]],["Dylan · ph
 var lot=LOTS[0],cur=(location.hash||'#cade').slice(1);
 function $(s){return document.querySelector(s)}
 function toast(m){var t=$('#t');t.textContent=m;t.className='t on';setTimeout(function(){t.className='t'},2000)}
+async function toFile(u,name){var b=await (await fetch(u)).blob();return new File([b],name,{type:u.endsWith('.mp4')?'video/mp4':'image/jpeg'})}
+async function saveAll(items,a){
+  try{var fs=[];for(var i=0;i<items.length;i++){var it=items[i];fs.push(await toFile(it.u,a.id+'-'+(it.v?'video.mp4':(i+1)+'.jpg')))}
+    if(navigator.canShare&&navigator.canShare({files:fs})){await navigator.share({files:fs});return}}catch(e){if(e&&e.name==='AbortError')return}
+  toast('Partage multiple non disponible : utilise les boutons un par un');
+}
 async function save(u,name){
   try{
     var b=await (await fetch(u)).blob();
-    var f=new File([b],name,{type:b.type||(u.endsWith('.mp4')?'video/mp4':'image/jpeg')});
+    var f=new File([b],name,{type:u.endsWith('.mp4')?'video/mp4':'image/jpeg'});
     if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}
   }catch(e){ if(e&&e.name==='AbortError') return; }
   var a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
@@ -35,8 +41,8 @@ function render(){
   $('#nav').innerHTML=PHONES.map(function(p){return '<span class="ph">📱 '+p[0]+'</span>'+p[1].map(function(id){var x=lot.accounts.find(function(y){return y.id==id});return '<button class="'+(id==cur?'on':'')+'" data-id="'+id+'">'+x.handle+'</button>'}).join('')}).join('');
   [].forEach.call(document.querySelectorAll('nav button'),function(b){b.onclick=function(){cur=b.dataset.id;location.hash=cur;render();scrollTo(0,0)}});
   var items=a.video?[{u:a.video,v:1,p:a.poster}]:a.slides.map(function(u){return{u:u}});
-  $('#main').innerHTML='<h2 style="margin:0 0 12px;font-size:18px">'+a.handle+'</h2>'+items.map(function(it,i){return '<div class="it">'+(it.v?'<video src="'+it.u+'" poster="'+it.p+'" controls playsinline muted loop></video>':'<img src="'+it.u+'">')+'<button class="sv" data-i="'+i+'">⬇︎ Enregistrer '+(it.v?'la vidéo':'la slide '+(i+1))+'</button></div>'}).join('')+'<button class="cp" id="cp">Copier la description</button><div class="cap" id="cap"></div>';
-  $('#cap').textContent=a.caption;
+  $('#main').innerHTML='<h2 style="margin:0 0 12px;font-size:18px">'+a.handle+'</h2>'+(a.video?'':'<button class="sv" id="all" style="margin-bottom:16px">\u2b07\ufe0e Tout enregistrer ('+items.length+' slides)</button>')+'<p style="color:#9a968f;font-size:13px;margin:0 0 14px">Dans le menu iPhone, choisis \u00ab Enregistrer X images \u00bb / \u00ab Enregistrer la vid\u00e9o \u00bb. Si l\u2019option n\u2019appara\u00eet pas : R\u00e9glages \u203a Confidentialit\u00e9 \u203a Photos \u203a Safari \u203a Ajouter uniquement.</p>'+items.map(function(it,i){return '<div class="it">'+(it.v?'<video src="'+it.u+'" poster="'+it.p+'" controls playsinline muted loop></video>':'<img src="'+it.u+'">')+'<button class="sv" data-i="'+i+'">⬇︎ Enregistrer '+(it.v?'la vidéo':'la slide '+(i+1))+'</button></div>'}).join('')+'<button class="cp" id="cp">Copier la description</button><div class="cap" id="cap"></div>';
+  $('#cap').textContent=a.caption;var al=$('#all');if(al)al.onclick=function(){saveAll(items,a)};
   [].forEach.call(document.querySelectorAll('.sv'),function(b){b.onclick=function(){var it=items[+b.dataset.i];save(it.u,a.id+'-'+(it.v?'video.mp4':(+b.dataset.i+1)+'.jpg'))}});
   $('#cp').onclick=function(){var r=document.createRange();r.selectNodeContents($('#cap'));var s=getSelection();s.removeAllRanges();s.addRange(r);var ok=false;try{ok=document.execCommand('copy')}catch(e){};if(navigator.clipboard)navigator.clipboard.writeText(a.caption).then(function(){toast('Description copiée')},function(){toast(ok?'Description copiée':'Texte sélectionné : Copier')});else toast(ok?'Description copiée':'Texte sélectionné : Copier')};
 }
