@@ -35,6 +35,7 @@ function share(fs){
   else toast('Partage non disponible sur ce t\u00e9l\u00e9phone');
 }
 function render(){var ls=$("#ls");ls.innerHTML=LOTS.map(function(l,i){return '<option value="'+i+'"'+(i==LI?" selected":"")+">"+l.label+"</option>"}).join("");ls.onchange=function(){sessionStorage.setItem("li",ls.value);location.reload()};
+  PHONES=PHONES.map(function(p){var r=[];p[1].forEach(function(id){lot.accounts.forEach(function(y){if(y.id==id||y.id.indexOf(id+'-')==0)r.push(y.id)})});return [p[0],r]});
   var a=lot.accounts.find(function(x){return x.id==cur})||lot.accounts[0];cur=a.id;
   $('#nav').innerHTML=PHONES.filter(function(p){return p[1].some(function(id){return lot.accounts.some(function(y){return y.id==id})})}).map(function(p){return '<span class="ph">📱 '+p[0]+'</span>'+p[1].map(function(id){var x=lot.accounts.find(function(y){return y.id==id});if(!x)return '';return '<button class="'+(id==cur?'on':'')+'" data-id="'+id+'">'+x.handle+'</button>'}).join('')}).join('');
   [].forEach.call(document.querySelectorAll('nav button'),function(b){b.onclick=function(){cur=b.dataset.id;location.hash=cur;render();scrollTo(0,0)}});
