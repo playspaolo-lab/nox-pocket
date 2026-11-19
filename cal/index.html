@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendrier Instagram · NOX</title><link rel="stylesheet" href="calendar.css"><script src="data.js"></script><script src="calendar.js" defer></script></head>
+<body>
+<div class="app">
+  <aside class="nav">
+    <a class="brand" href="/calendar"><span class="logo">N</span>NOX</a>
+    <a class="on" href="/calendar"><span>▦</span>Calendrier</a>
+    
+    
+  </aside>
+  <aside class="accounts">
+    <h2><span class="tt">◉</span> Instagram</h2>
+    <button class="acc all on" data-account="">
+      <span class="avatar all">4</span><span><b>Tous les comptes</b><small>aperçu global</small></span>
+    </button>
+    <div id="account-list"></div>
+  </aside>
+  <main>
+    <header class="top">
+      <h1 id="title">CALENDRIER</h1>
+      <div class="stats" id="stats"></div>
+      <div class="period"><button id="prev" aria-label="Précédent">‹</button><strong id="range"></strong><button id="next" aria-label="Suivant">›</button><button id="today" class="ghost">Aujourd’hui</button></div>
+      <button id="anon" class="anon" role="switch" aria-checked="false" title="Flouter photos de profil et noms (pour montrer le calendrier)"><span class="trk"><i></i></span><span class="lbl">Normal</span></button><div class="seg" role="group" aria-label="Vue"><button data-view="day">Jour</button><button data-view="week" class="on">Semaine</button><button data-view="month">Mois</button></div>
+    </header>
+    <p class="zone">Heures de <b>New York</b> (heure de publication Instagram) · heure de Bruxelles en petit · par compte et par jour : <span class="kind remix">remix</span> ×3 et <span class="kind new">nouvelle</span> ×2 · publication par le proxy US du compte</p>
+    <section id="board" aria-live="polite"><div class="loading">Chargement du calendrier…</div></section>
+  </main>
+</div>
+<input type="file" id="pfp" accept="image/jpeg,image/png,image/webp" hidden>
+<dialog id="preview"><button class="close" id="close" aria-label="Fermer">×</button><div id="preview-body"></div></dialog>
+</body></html>
