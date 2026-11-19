@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>nox bridge</title>
+<script>
+// Pont NOX : renvoie une image du depot (meme origine) a la page TikTok Studio qui l'a integre en iframe.
+window.addEventListener('message', async function (e) {
+  if (e.origin !== 'https://www.tiktok.com') return;
+  var d = e.data || {};
+  if (!d.id || typeof d.name !== 'string' || !/^[\w.-]+\.(jpg|jpeg|png|webp)$/i.test(d.name)) return;
+  try {
+    var r = await fetch(d.name + '?v=' + Date.now());
+    if (!r.ok) throw new Error('http ' + r.status);
+    var b = await r.arrayBuffer();
+    e.source.postMessage({ id: d.id, ok: true, buf: b, type: r.headers.get('content-type') || 'image/jpeg' }, e.origin, [b]);
+  } catch (err) { e.source.postMessage({ id: d.id, ok: false, err: String(err) }, e.origin); }
+});
+parent.postMessage({ ready: true }, 'https://www.tiktok.com');
+</script>
