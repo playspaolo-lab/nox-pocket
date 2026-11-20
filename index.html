@@ -7,6 +7,7 @@ nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;-webkit-overflow-scr
 nav .ph{flex:none;align-self:center;color:#e8c48a;font-size:12px;font-weight:600;padding-left:8px}
 nav button{flex:none;background:#18181a;color:#f4f1ec;border:1px solid #2c2c2e;border-radius:999px;padding:7px 12px;font-size:13px}
 nav button.on{background:#e8c48a;color:#111;font-weight:600}
+#pf{display:flex;gap:8px;padding:10px 0 0}#pf button{flex:1;background:#18181a;color:#f4f1ec;border:1px solid #2c2c2e;border-radius:999px;padding:9px 0;font-size:15px}#pf button.on{background:#e8c48a;color:#111;font-weight:700}
 main{padding:12px 14px 60px;max-width:700px;margin:0 auto}
 .it{margin-bottom:22px}.it img,.it video{width:100%;border-radius:12px;display:block;background:#000}
 .sv{display:block;width:100%;margin-top:8px;background:#e8c48a;color:#111;border:0;border-radius:12px;padding:14px;font-size:17px;font-weight:700}
@@ -14,7 +15,7 @@ main{padding:12px 14px 60px;max-width:700px;margin:0 auto}
 .cap{background:#18181a;border-radius:12px;padding:14px;white-space:pre-wrap;font-size:14px;-webkit-user-select:text;user-select:text}
 .t{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:10px;opacity:0;transition:.2s}.t.on{opacity:1}
 </style></head><body>
-<header><h1>NOX <b>Pocket</b> · USA</h1><select id="ls" style="margin-top:6px;background:#18181a;color:#f4f1ec;border:1px solid #2c2c2e;border-radius:8px;padding:6px"></select><nav id="nav"></nav></header><main id="main"></main><div class="t" id="t"></div>
+<header><h1>NOX <b>Pocket</b> · USA</h1><select id="ls" style="margin-top:6px;background:#18181a;color:#f4f1ec;border:1px solid #2c2c2e;border-radius:8px;padding:6px"></select><div id="pf"></div><nav id="nav"></nav></header><main id="main"></main><div class="t" id="t"></div>
 <script src="lot-20261117.js"></script>
 <script src="lot-stories-20261117.js"></script>
 <script src="lot-stories-20261118.js"></script>
@@ -41,7 +42,10 @@ function share(fs){
 function render(){var ls=$("#ls");ls.innerHTML=LOTS.map(function(l,i){return '<option value="'+i+'"'+(i==LI?" selected":"")+">"+l.label+"</option>"}).join("");ls.onchange=function(){sessionStorage.setItem("li",ls.value);location.reload()};
   PHONES=PHONES.map(function(p){var r=[];p[1].forEach(function(id){lot.accounts.forEach(function(y){if(y.id==id||y.id.indexOf(id+'-')==0)r.push(y.id)})});return [p[0],r]});
   var a=lot.accounts.find(function(x){return x.id==cur})||lot.accounts[0];cur=a.id;
-  $('#nav').innerHTML=PHONES.filter(function(p){return p[1].some(function(id){return lot.accounts.some(function(y){return y.id==id})})}).map(function(p){return '<span class="ph">📱 '+p[0]+'</span>'+p[1].map(function(id){var x=lot.accounts.find(function(y){return y.id==id});if(!x)return '';return '<button class="'+(id==cur?'on':'')+'" data-id="'+id+'">'+x.handle+'</button>'}).join('')}).join('');
+  var hasP=lot.accounts.some(function(y){return /^fb(cy|lou|sasha|kai)-/.test(y.id)}),pf=hasP?(sessionStorage.getItem('pf')||''):'';
+  $('#pf').innerHTML=hasP?['','cy','lou','sasha','kai'].map(function(k){return '<button data-k="'+k+'" class="'+(k==pf?'on':'')+'">'+(k?k.charAt(0).toUpperCase()+k.slice(1):'Tous')+'</button>'}).join(''):'';
+  [].forEach.call(document.querySelectorAll('#pf button'),function(b){b.onclick=function(){var k=b.dataset.k;sessionStorage.setItem('pf',k);if(k){var f=lot.accounts.find(function(y){return y.id.indexOf('fb'+k+'-')==0});if(f){cur=f.id;location.hash=cur}}render();scrollTo(0,0)}});
+  $('#nav').innerHTML=PHONES.filter(function(p){return p[1].some(function(id){return lot.accounts.some(function(y){return y.id==id})})&&(!pf||p[1][0].indexOf('fb'+pf+'-')==0)}).map(function(p){return '<span class="ph">📱 '+p[0]+'</span>'+p[1].map(function(id){var x=lot.accounts.find(function(y){return y.id==id});if(!x)return '';return '<button class="'+(id==cur?'on':'')+'" data-id="'+id+'">'+x.handle+'</button>'}).join('')}).join('');
   [].forEach.call(document.querySelectorAll('nav button'),function(b){b.onclick=function(){cur=b.dataset.id;location.hash=cur;render();scrollTo(0,0)}});
   var items=a.video?[{u:a.video,v:1,p:a.poster}]:a.slides.map(function(u){return{u:u}});
   $('#main').innerHTML='<h2 style="margin:0 0 12px;font-size:18px">'+a.handle+'</h2>'+(a.video?'':'<button class="sv" id="all" style="margin-bottom:16px">\u2b07\ufe0e Tout enregistrer ('+items.length+' slides)</button>')+'<p style="color:#9a968f;font-size:13px;margin:0 0 14px">Dans le menu iPhone, choisis \u00ab Enregistrer X images \u00bb / \u00ab Enregistrer la vid\u00e9o \u00bb. Si l\u2019option n\u2019appara\u00eet pas : R\u00e9glages \u203a Confidentialit\u00e9 \u203a Photos \u203a Safari \u203a Ajouter uniquement.</p>'+items.map(function(it,i){return '<div class="it">'+(it.v?'<video src="'+it.u+'" poster="'+it.p+'" controls playsinline muted loop></video>':'<img src="'+it.u+'">')+'<button class="sv" data-i="'+i+'">⬇︎ Enregistrer '+(it.v?'la vidéo':'la slide '+(i+1))+'</button></div>'}).join('')+'<button class="cp" id="cp">Copier la description</button><div class="cap" id="cap"></div>';
