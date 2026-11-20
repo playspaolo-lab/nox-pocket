@@ -77,9 +77,11 @@ function week() {
   const today = ui.data.today;
   return `<div class="week">${ui.data.days.map(day => {
     const items = visible().filter(i => i.day === day).sort((a, b) => a.at.localeCompare(b.at)), free = freeVisible().filter(f => f.day === day);
+    const g = (ui.data.grid && ui.data.grid[day]) || [];
+    const hoursBox = g.length ? `<div class="hours">${g.map(h => { const n = items.filter(i => i.type !== 'story' && Math.abs(new Date(i.at) - new Date(h.at)) < 30 * 60000).length, tot = ui.account ? 1 : ui.data.accounts.length; return `<div class="hr ${n >= tot ? 'full' : n ? 'part' : 'empty'}"><b>${h.hour}</b><small>${hm(h.at, BE)} BE</small><span>${n}/${tot}</span></div>`; }).join('')}</div>` : '';
     const showFree = ui.account ? free.map(freeCard).join('') : (free.length ? `<div class="free-sum">${free.length} créneaux libres</div>` : '');
     return `<div class="col ${day === today ? 'today' : ''} ${day < today ? 'past' : ''}"><div class="col-head"><div><span>${esc(dayName(day, { weekday: 'short' }))}</span><b>${Number(day.slice(8))}</b></div></div>
-      ${fillBar(day)}${items.map(i => card(i, true)).join('')}${showFree}${!items.length && !free.length ? '<div class="free-sum">rien ce jour</div>' : ''}</div>`;
+      ${fillBar(day)}${hoursBox}${items.map(i => card(i, true)).join('')}${showFree}${!items.length && !free.length ? '<div class="free-sum">rien ce jour</div>' : ''}</div>`;
   }).join('')}</div>`;
 }
 
@@ -115,9 +117,18 @@ function month() {
   }).join('')}</div>`;
 }
 
+function horaires() {
+  const W = ui.data.week || {}, K = ui.data.kinds || [], names = { Mon: 'Lundi', Tue: 'Mardi', Wed: 'Mercredi', Thu: 'Jeudi', Fri: 'Vendredi', Sat: 'Samedi', Sun: 'Dimanche' };
+  const be = (hhmm) => { const d = new Date(); const [h, m] = hhmm.split(':').map(Number); const ny = new Date(Date.UTC(2026, 10, 18, h + 5, m)); return hm(ny.toISOString(), BE); };
+  $('#preview-body').innerHTML = `<div style="padding:22px"><h3 style="margin:0 0 4px">Horaires de publication</h3><p style="color:var(--muted);margin:0 0 14px">Heure de New York (heure de Bruxelles en petit). Chaque heure = 1 Reel par compte, avec ~1 min d'écart entre les comptes. Story chaque jour à ${esc(ui.data.storyTime || '10:00')} NY (${be(ui.data.storyTime || '10:00')} BE).</p>
+  <table class="htab"><tr><th></th>${(W.Mon || []).map((_, k) => `<th><span class="kind ${K[k] || 'remix'}">${K[k] === 'new' ? 'nouvelle' : 'remix'}</span></th>`).join('')}</tr>
+  ${Object.keys(names).map(k => `<tr><td><b>${names[k]}</b></td>${(W[k] || []).map(h => `<td><b>${h}</b><br><small>${be(h)} BE</small></td>`).join('')}</tr>`).join('')}</table></div>`;
+  $('#preview').showModal();
+}
 function render() {
   accountsPanel(); stats();
   const { days } = ui.data;
+  if (!document.getElementById('horaires')) { const b = document.createElement('button'); b.id = 'horaires'; b.className = 'ghost'; b.textContent = '🕒 Horaires'; b.style.cssText = 'width:auto;padding:0 12px;font-size:13px;border-radius:99px;background:#fff;border:1px solid var(--line);height:34px'; const per = document.querySelector('.period'); per && per.append(b); }
   $('#range').textContent = ui.view === 'day' ? dayName(days[0], { weekday: 'short', day: 'numeric', month: 'short' })
     : ui.view === 'week' ? `${Number(days[0].slice(8))} – ${dayName(days[6], { day: 'numeric', month: 'short' })}`
     : dayName(`${ui.anchor.slice(0, 7)}-15`, { month: 'long', year: 'numeric' });
@@ -194,6 +205,7 @@ document.addEventListener('click', async ev => {
     else { const [y, m] = ui.anchor.split('-').map(Number); ui.anchor = new Date(Date.UTC(y, m - 1 + dir, 1)).toISOString().slice(0, 10); }
     load(); return;
   }
+  if (t.closest('#horaires')) { horaires(); return; }
   if (t.closest('#today')) { ui.anchor = nyDay(new Date()); load(); return; }
   if (t.closest('#close')) $('#preview').close();
 });
