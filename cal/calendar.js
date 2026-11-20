@@ -59,7 +59,8 @@ function stats() {
     + `<span class="stat free">◌ ${free.length} libres (${free.filter(f => f.kind === 'remix').length} remix · ${free.filter(f => f.kind === 'new').length} nouvelles)</span>` + LEGEND;
 }
 
-const tsrc = u => (u || '').replace(/^\/files\/(\w+)\/final\.mp4.*$/, '/cthumb/$1.jpg').replace(/^\/story-img\//, '/story-thumb/');
+const nyToIso = (day, hhmm) => { const [y, mo, d] = day.split('-').map(Number), [h, mi] = hhmm.split(':').map(Number); let t = Date.UTC(y, mo - 1, d, h + 5, mi); const got = Number(new Intl.DateTimeFormat('en-US', { timeZone: NY, hour: '2-digit', hourCycle: 'h23' }).format(new Date(t))); if (got !== h) t -= (got - h) * 3600e3; return new Date(t).toISOString(); };
+const tsrc = u => (u || '').replace(/^\/files\/(\w+)\/final\.mp4.*$/, '/cthumb/$1.jpg').replace(/^\/story-img\//, '/story-thumb/').replace(/^(v\/\w+)\.mp4.*$/, '$1.jpg').replace(/^s\/(.+)$/, 's/t-$1');
 const thumb = i => i.type === 'story' && i.media[0] ? `<span class="thumb" style="background-image:url('${tsrc(i.media[0])}')"></span>` : i.media[0] ? `<span class="thumb" style="background:#111"><img src="${tsrc(i.media[0])}" loading="lazy" decoding="async" alt=""></span>` : `<span class="thumb text">▶</span>`;
 // 20/11 : couleur = état + type (légende en haut)
 const colorCls = i => i.type === 'story' ? 'c-story' : i.error && i.status !== 'published' ? 'c-err' : i.status === 'published' ? (i.kind === 'new' ? 'c-pubnew' : 'c-pub') : (i.kind === 'new' ? 'c-new' : 'c-remix');
@@ -73,7 +74,7 @@ function card(i, compact = false) {
 const freeCard = f => f.kind === 'story' ? `<div class="free story"><span>${hm(f.at)} · story ${f.err ? '⚠ ' + esc(f.err) : f.ready ? 'prête' : 'auto (faite par l’app)'}</span><span>${ui.account ? '' : esc(f.account)}</span></div>` : `<button class="free ${f.kind}" data-free="${f.account}|${f.base}"><span>${hm(f.at)} · ${f.kind === 'new' ? 'nouvelle à faire' : 'remix à faire'}</span><span>${ui.account ? '' : esc(f.account)}</span></button>`;
 
 function fillBar(day) {
-  const n = visible().filter(i => i.day === day).length, total = slotsPerDay(), pct = total ? Math.min(100, Math.round(n / total * 100)) : 0;
+  const n = visible().filter(i => i.day === day && i.type !== 'story').length, total = slotsPerDay(), pct = total ? Math.min(100, Math.round(n / total * 100)) : 0;
   return `<div class="fill"><i style="width:${pct}%"></i></div><div class="fill-label">${n} / ${total} Reels</div>`;
 }
 
@@ -82,7 +83,9 @@ function week() {
   return `<div class="week">${ui.data.days.map(day => {
     const items = visible().filter(i => i.day === day).sort((a, b) => a.at.localeCompare(b.at)), free = freeVisible().filter(f => f.day === day);
     const g = (ui.data.grid && ui.data.grid[day]) || [];
-    const hoursBox = g.length ? `<div class="hours">${g.map(h => { const n = items.filter(i => i.type !== 'story' && Math.abs(new Date(i.at) - new Date(h.at)) < 30 * 60000).length, tot = ui.account ? 1 : ui.data.accounts.length; return `<div class="hr ${n >= tot ? 'full' : n ? 'part' : 'empty'}"><b>${h.hour}</b><small>${hm(h.at, BE)} BE</small><span>${n}/${tot}</span></div>`; }).join('')}</div>` : '';
+    const stT = ui.data.storyTime || '10:00', stIso = nyToIso(day, stT), stN = items.filter(i => i.type === 'story').length, stTot = ui.account ? 1 : ui.data.accounts.length;
+    const storyRow = `<div class="hr story-row ${stN >= stTot ? 'full' : stN ? 'part' : 'empty'}"><b>${stT}</b><small>${hm(stIso, BE)} BE · STORY</small><span>${stN}/${stTot}</span></div>`;
+    const hoursBox = g.length ? `<div class="hours">${storyRow}${g.map(h => { const n = items.filter(i => i.type !== 'story' && Math.abs(new Date(i.at) - new Date(h.at)) < 30 * 60000).length, tot = ui.account ? 1 : ui.data.accounts.length; return `<div class="hr ${n >= tot ? 'full' : n ? 'part' : 'empty'}"><b>${h.hour}</b><small>${hm(h.at, BE)} BE</small><span>${n}/${tot}</span></div>`; }).join('')}</div>` : '';
     const showFree = ui.account ? free.map(freeCard).join('') : (free.length ? `<div class="free-sum">${free.length} créneaux libres</div>` : '');
     return `<div class="col ${day === today ? 'today' : ''} ${day < today ? 'past' : ''}"><div class="col-head"><div><span>${esc(dayName(day, { weekday: 'short' }))}</span><b>${Number(day.slice(8))}</b></div></div>
       ${fillBar(day)}${hoursBox}${items.map(i => card(i, true)).join('')}${showFree}${!items.length && !free.length ? '<div class="free-sum">rien ce jour</div>' : ''}</div>`;

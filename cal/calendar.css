@@ -139,3 +139,5 @@ a.btn{text-decoration:none;display:inline-block}.copied{color:#22a06b;font-weigh
 .lg.c-err{background:#fde8e8}.lg.c-err::before{background:#e5484d}
 .mini i.dot{display:inline-block}
 .mini i.dot.c-pub{background:#22a06b!important}.mini i.dot.c-pubnew{background:#22a06b!important;box-shadow:inset -3px 0 0 #f08c00}.mini i.dot.c-remix{background:#3b5bfd!important}.mini i.dot.c-new{background:#f08c00!important}.mini i.dot.c-story{background:#d6409f!important}.mini i.dot.c-err{background:#e5484d!important}
+
+.hr.story-row{border:1px dashed currentColor}.hr.story-row small{font-weight:700;letter-spacing:.3px}
