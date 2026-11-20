@@ -59,7 +59,8 @@ function stats() {
     + `<span class="stat free">◌ ${free.length} libres (${free.filter(f => f.kind === 'remix').length} remix · ${free.filter(f => f.kind === 'new').length} nouvelles)</span>` + LEGEND;
 }
 
-const thumb = i => i.type === 'story' && i.media[0] ? `<span class="thumb" style="background-image:url('${i.media[0]}')"></span>` : i.media[0] ? `<span class="thumb" style="background:#111"><video src="${i.media[0]}#t=0.6" preload="metadata" muted playsinline></video></span>` : `<span class="thumb text">▶</span>`;
+const tsrc = u => (u || '').replace(/^\/files\/(\w+)\/final\.mp4.*$/, '/cthumb/$1.jpg').replace(/^\/story-img\//, '/story-thumb/');
+const thumb = i => i.type === 'story' && i.media[0] ? `<span class="thumb" style="background-image:url('${tsrc(i.media[0])}')"></span>` : i.media[0] ? `<span class="thumb" style="background:#111"><img src="${tsrc(i.media[0])}" loading="lazy" decoding="async" alt=""></span>` : `<span class="thumb text">▶</span>`;
 // 20/11 : couleur = état + type (légende en haut)
 const colorCls = i => i.type === 'story' ? 'c-story' : i.error && i.status !== 'published' ? 'c-err' : i.status === 'published' ? (i.kind === 'new' ? 'c-pubnew' : 'c-pub') : (i.kind === 'new' ? 'c-new' : 'c-remix');
 const LEGEND = `<div class="legend"><span class="lg c-pub">Publiée (remix)</span><span class="lg c-pubnew">Publiée (nouvelle vidéo Kling)</span><span class="lg c-remix">Remix à publier</span><span class="lg c-new">Nouvelle vidéo Kling à publier</span><span class="lg c-story">Story</span><span class="lg c-err">Erreur</span></div>`;
@@ -99,7 +100,7 @@ function dayView() {
     const n = items.filter(i => i.account === a.short).length;
     return `<span class="chip ${n >= a.perDay ? 'full' : n === 0 ? 'none' : ''}">${esc(a.short)} ${n}/${a.perDay}</span>`;
   }).join('');
-  const strip = [...items].sort((a, b) => a.at.localeCompare(b.at)).map(i => `<button data-item="${esc(i.id)}" style="background:#111"><video src="${i.media[0] || ''}#t=0.6" preload="metadata" muted playsinline style="width:100%;height:100%;object-fit:cover;border-radius:10px;pointer-events:none"></video><span>${hm(i.at)}</span></button>`).join('');
+  const strip = [...items].sort((a, b) => a.at.localeCompare(b.at)).map(i => `<button data-item="${esc(i.id)}" style="background:#111"><img src="${tsrc(i.media[0])}" loading="lazy" decoding="async" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px;pointer-events:none"><span>${hm(i.at)}</span></button>`).join('');
   const remix = items.filter(i => i.kind === 'remix').length;
   return `<div class="day"><div class="timeline">${hours}</div><aside class="summary">
     <h3>${esc(dayName(day, { weekday: 'long', day: 'numeric', month: 'long' }))}</h3><p>Ce qui sort ce jour-là, dans l’ordre (heure NY, Bruxelles en petit).</p>
@@ -171,13 +172,13 @@ function pickForSlot(account, base) {
   const ready = ui.data.ready.filter(r => r.account === account);
   $('#preview-body').innerHTML = `<div class="pick"><h3>${hdl(ui.data.accounts.find(a => a.short === account).handle)} · ${f ? esc(slotLabel(f)) : ''}</h3>
     <p>${ready.length ? 'Choisis le Reel prêt à publier sur ce créneau.' : `Aucun Reel prêt pour ce compte. Ce créneau attend un${f && f.kind === 'new' ? 'e nouvelle vidéo' : ' remix'}.`}</p><div class="msg" id="msg"></div>
-    ${ready.map(r => `<div class="opt"><video src="${r.media[0]}#t=0.6" preload="metadata" controls playsinline></video><small><span class="kind ${r.kind}">${KIND[r.kind]}</span> ${esc(hookTxt(r.hook))}</small><button class="btn" style="margin-top:6px;width:100%" data-place="${r.id}|${base}">Placer ici</button></div>`).join('')}</div>`;
+    ${ready.map(r => `<div class="opt"><video src="${r.media[0]}" poster="${tsrc(r.media[0])}" preload="none" controls playsinline></video><small><span class="kind ${r.kind}">${KIND[r.kind]}</span> ${esc(hookTxt(r.hook))}</small><button class="btn" style="margin-top:6px;width:100%" data-place="${r.id}|${base}">Placer ici</button></div>`).join('')}</div>`;
   $('#preview').showModal();
 }
 function pickReady() {
   const ready = ui.data.ready.filter(r => !ui.account || r.account === ui.account);
   $('#preview-body').innerHTML = `<div class="pick"><h3>Prêts à placer</h3><p>Clique sur un créneau libre du compte dans le calendrier, ou mets le Reel au prochain créneau libre.</p><div class="msg" id="msg"></div>
-    ${ready.map(r => `<div class="opt"><video src="${r.media[0]}#t=0.6" preload="metadata" controls playsinline></video><small><b>${esc(r.account)}</b> <span class="kind ${r.kind}">${KIND[r.kind]}</span> ${esc(hookTxt(r.hook))}</small><button class="btn" style="margin-top:6px;width:100%" data-next="${r.id}|${r.account}">Au prochain créneau libre</button></div>`).join('')}</div>`;
+    ${ready.map(r => `<div class="opt"><video src="${r.media[0]}" poster="${tsrc(r.media[0])}" preload="none" controls playsinline></video><small><b>${esc(r.account)}</b> <span class="kind ${r.kind}">${KIND[r.kind]}</span> ${esc(hookTxt(r.hook))}</small><button class="btn" style="margin-top:6px;width:100%" data-next="${r.id}|${r.account}">Au prochain créneau libre</button></div>`).join('')}</div>`;
   $('#preview').showModal();
 }
 async function act(id, body, action) {
