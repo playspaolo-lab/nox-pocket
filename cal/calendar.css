@@ -121,3 +121,21 @@ a.btn{text-decoration:none;display:inline-block}.copied{color:#22a06b;font-weigh
 .hours{display:flex;flex-direction:column;gap:3px;margin:0 2px 10px}.hr{display:flex;align-items:baseline;gap:6px;font-size:11.5px;padding:3px 7px;border-radius:8px;background:#fff}.hr b{font-size:12.5px}.hr small{color:var(--muted);flex:1}.hr span{font-weight:700}
 .hr.full{background:#e3f6ec;color:#127a4d}.hr.part{background:#fff4e0;color:#a5620b}.hr.empty{background:#fdecec;color:#b42318}
 .htab{border-collapse:collapse;width:100%;font-size:13px}.htab td,.htab th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:center}.htab td:first-child{text-align:left}.htab small{color:var(--muted)}
+/* 20/11 : couleurs par état et type + légende */
+.card.c-pub{background:#e6f6ee;border-left-color:#22a06b}
+.card.c-pubnew{background:#e6f6ee;border-left:6px solid #f08c00;box-shadow:inset 0 0 0 2px #22a06b}
+.card.c-remix{background:#eaf0ff;border-left-color:#3b5bfd}
+.card.c-new{background:#fff1dc;border-left:6px solid #f08c00}
+.card.c-story{background:#fde7f3;border-left-color:#d6409f}
+.card.c-err{background:#fde8e8;border-left-color:#e5484d}
+.legend{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:6px}
+.lg{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;border:1px solid #0001}
+.lg::before{content:"";width:11px;height:11px;border-radius:3px;display:inline-block}
+.lg.c-pub{background:#e6f6ee}.lg.c-pub::before{background:#22a06b}
+.lg.c-pubnew{background:#e6f6ee}.lg.c-pubnew::before{background:#22a06b;box-shadow:inset -5px 0 0 #f08c00}
+.lg.c-remix{background:#eaf0ff}.lg.c-remix::before{background:#3b5bfd}
+.lg.c-new{background:#fff1dc}.lg.c-new::before{background:#f08c00}
+.lg.c-story{background:#fde7f3}.lg.c-story::before{background:#d6409f}
+.lg.c-err{background:#fde8e8}.lg.c-err::before{background:#e5484d}
+.mini i.dot{display:inline-block}
+.mini i.dot.c-pub{background:#22a06b!important}.mini i.dot.c-pubnew{background:#22a06b!important;box-shadow:inset -3px 0 0 #f08c00}.mini i.dot.c-remix{background:#3b5bfd!important}.mini i.dot.c-new{background:#f08c00!important}.mini i.dot.c-story{background:#d6409f!important}.mini i.dot.c-err{background:#e5484d!important}

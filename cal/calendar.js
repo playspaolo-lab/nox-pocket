@@ -56,12 +56,15 @@ function stats() {
   const ready = ui.data.ready.filter(r => !ui.account || r.account === ui.account).length;
   $('#stats').innerHTML = `<span class="stat ok">✓ ${c('published')} publiés</span><span class="stat plan">▣ ${c('scheduled')} programmés</span>`
     + (ready ? `<button class="ready-btn" data-ready="1">● ${ready} prêts à placer</button>` : '')
-    + `<span class="stat free">◌ ${free.length} libres (${free.filter(f => f.kind === 'remix').length} remix · ${free.filter(f => f.kind === 'new').length} nouvelles)</span>`;
+    + `<span class="stat free">◌ ${free.length} libres (${free.filter(f => f.kind === 'remix').length} remix · ${free.filter(f => f.kind === 'new').length} nouvelles)</span>` + LEGEND;
 }
 
 const thumb = i => i.type === 'story' && i.media[0] ? `<span class="thumb" style="background-image:url('${i.media[0]}')"></span>` : i.media[0] ? `<span class="thumb" style="background:#111"><video src="${i.media[0]}#t=0.6" preload="metadata" muted playsinline></video></span>` : `<span class="thumb text">▶</span>`;
+// 20/11 : couleur = état + type (légende en haut)
+const colorCls = i => i.type === 'story' ? 'c-story' : i.error && i.status !== 'published' ? 'c-err' : i.status === 'published' ? (i.kind === 'new' ? 'c-pubnew' : 'c-pub') : (i.kind === 'new' ? 'c-new' : 'c-remix');
+const LEGEND = `<div class="legend"><span class="lg c-pub">Publiée (remix)</span><span class="lg c-pubnew">Publiée (nouvelle vidéo Kling)</span><span class="lg c-remix">Remix à publier</span><span class="lg c-new">Nouvelle vidéo Kling à publier</span><span class="lg c-story">Story</span><span class="lg c-err">Erreur</span></div>`;
 function card(i, compact = false) {
-  return `<button class="card ${esc(i.status)}" data-item="${esc(i.id)}" title="${esc(i.label)}">${thumb(i)}<span class="meta">
+  return `<button class="card ${esc(i.status)} ${colorCls(i)}" data-item="${esc(i.id)}" title="${esc(i.label)}">${thumb(i)}<span class="meta">
     <span class="t">${hm(i.at)}<span class="kind ${i.kind}">${KIND[i.kind]}</span>${compact ? '' : `<small>${hm(i.at, BE)} BE</small>`}</span>
     <span class="who">${av(i.account, 'sm')}${hdl(i.handle)}</span>
     <span class="cap">${esc(i.hook ? hookTxt(i.hook) : i.caption)}</span></span></button>`;
@@ -111,7 +114,7 @@ function month() {
   const head = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'].map(d => `<div class="mhead">${d}</div>`).join('');
   return `<div class="month">${head}${ui.data.days.map(day => {
     const items = visible().filter(i => i.day === day), free = freeVisible().filter(f => f.day === day).length;
-    const mini = items.slice(0, 20).map(i => `<i class="${i.status === 'published' ? 'ok' : 'plan'}" style="background-color:${COLORS[i.account]}55"></i>`).join('');
+    const mini = items.slice(0, 20).map(i => `<i class="dot ${colorCls(i)}"></i>`).join('');
     return `<button class="mcell ${day.slice(0, 7) !== m ? 'out' : ''} ${day === today ? 'today' : ''}" data-day="${day}"><span class="d">${Number(day.slice(8))}<small>${items.length ? items.length + ' Reels' : ''}</small></span>
       <span class="mini">${mini}</span>${free ? `<small style="color:var(--muted)">${free} libres</small>` : ''}</button>`;
   }).join('')}</div>`;
