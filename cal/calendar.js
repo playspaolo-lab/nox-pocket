@@ -83,8 +83,8 @@ function week() {
   return `<div class="week">${ui.data.days.map(day => {
     const items = visible().filter(i => i.day === day).sort((a, b) => a.at.localeCompare(b.at)), free = freeVisible().filter(f => f.day === day);
     const g = (ui.data.grid && ui.data.grid[day]) || [];
-    const stT = ui.data.storyTime || '10:00', stIso = nyToIso(day, stT), stN = items.filter(i => i.type === 'story' && i.status === 'published').length, stTot = ui.account ? 1 : ui.data.accounts.length;
-    const storyRow = `<div class="hr story-row ${stN >= stTot ? 'full' : stN ? 'part' : 'empty'}"><b>${stT}</b><small>${hm(stIso, BE)} BE · STORY</small><span>${stN}/${stTot}</span></div>`;
+    const stT = ui.data.storyTime || '10:00', stIso = nyToIso(day, stT), stN = items.filter(i => i.type === 'story' && (i.status === 'published' || i.status === 'planned')).length, stTot = ui.account ? 1 : ui.data.accounts.length;
+    const storyRow = `<div class="hr story-row ${stN >= stTot ? (items.some(i => i.type === 'story' && i.status === 'planned') ? 'prog' : 'full') : stN ? 'part' : 'empty'}" title="${items.some(i => i.type === 'story' && i.status === 'planned') ? 'Stories programmées : publiées automatiquement par NOX Studio' : 'Stories publiées'}"><b>${stT}</b><small>${hm(stIso, BE)} BE · STORY</small><span>${stN}/${stTot}</span></div>`;
     const hoursBox = g.length ? `<div class="hours">${storyRow}${g.map(h => { const n = items.filter(i => i.type !== 'story' && Math.abs(new Date(i.at) - new Date(h.at)) < 30 * 60000).length, tot = ui.account ? 1 : ui.data.accounts.length; return `<div class="hr ${n >= tot ? 'full' : n ? 'part' : 'empty'}"><b>${h.hour}</b><small>${hm(h.at, BE)} BE</small><span>${n}/${tot}</span></div>`; }).join('')}</div>` : '';
     const showFree = ui.account ? free.map(freeCard).join('') : (free.length ? `<div class="free-sum">${free.length} créneaux libres</div>` : '');
     return `<div class="col ${day === today ? 'today' : ''} ${day < today ? 'past' : ''}"><div class="col-head"><div><span>${esc(dayName(day, { weekday: 'short' }))}</span><b>${Number(day.slice(8))}</b></div></div>
